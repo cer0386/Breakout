@@ -1,6 +1,8 @@
 package com.example.roman.breakout;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,56 +13,49 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 
 /**
  * Hraci plocha
  */
-public class BreakoutView extends View {
+
+
+//Runnable abych mohl pouzit vlakno na override run() metody
+public class BreakoutView extends SurfaceView implements Runnable {
+
+    Thread gameThread = null;
+
+    SurfaceHolder holder;
+
+    boolean pause = false;
+
+    Canvas canvas;
+    Paint paint;
+
+    long fps;
+
+    private long timeThisFrame;
 
     Bitmap bmp [];
-    int lx = 10;
-    int ly = 15;
-
-    int width, height;
 
     double screenW = this.getResources().getDisplayMetrics().widthPixels;
     double screenH = this.getResources().getDisplayMetrics().heightPixels;
 
-    private int level[][] = new int[][] {
-            {0,0,0,0,0,0,0,0,0,0},
-            {1,2,3,3,2,1,1,2,3,3},
-            {3,2,1,1,2,3,3,2,1,1},
-            {2,1,3,2,1,3,2,1,3,2},
-            {2,2,2,2,2,2,2,2,2,2},
-            {3,3,3,3,3,3,3,3,3,3},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,4,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0},
-    };
+
+
+
 
     public BreakoutView(Context context) {
         super(context);
-        init(null, 0);
+        holder = getHolder();
+        paint = new Paint();
     }
 
-    public BreakoutView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(attrs, 0);
-    }
-
-    public BreakoutView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        init(attrs, defStyle);
-    }
-
-    private void init(AttributeSet attrs, int defStyle) {
+/*    private void init(AttributeSet attrs, int defStyle) {
 
         bmp = new Bitmap[5];
         bmp[0] = BitmapFactory.decodeResource(getResources(), R.drawable.tile_gray);
@@ -70,22 +65,62 @@ public class BreakoutView extends View {
         bmp[4] = BitmapFactory.decodeResource(getResources(), R.drawable.platform);
 
     }
-
-
+*/
+/*
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh){
         width = w/lx;
         height = h/ly;
         super.onSizeChanged(w,h,oldw,oldh);
     }
+*/
+
+    protected void draw() {
+
+        if(holder.getSurface().isValid()){
+            canvas = holder.lockCanvas();
+
+            canvas.drawColor(Color.argb(255,  26, 128, 182));
+            paint.setColor(Color.argb(255,  255, 255, 255));
+
+
+            holder.unlockCanvasAndPost(canvas);
+        }
+
+    }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    public void run() {
 
-        for(int i = 0; i < ly;i++){
-            for (int j =0; j< lx;j++)
-                canvas.drawBitmap(bmp[level[i][j]], null, new Rect(j * width, i * height, (j+1) * width, (i + 1) * height), null);
+        while(!pause){
+            long startFrameTime = System.currentTimeMillis();
+
+            draw();
+
+            timeThisFrame = System.currentTimeMillis() - startFrameTime;
+            if(timeThisFrame >= 1){
+                fps = 1000/ timeThisFrame;
+            }
         }
+    }
+
+    public void update(){
+
+    }
+
+    public void pause(){
+        pause = true;
+        try{
+            gameThread.join();
+        } catch(InterruptedException e){
+            Log.e("Error: ", "joining thread");
+        }
+    }
+
+    public void resume(){
+        pause = false;
+        gameThread = new Thread(this);
+        gameThread.start();
     }
 
 
