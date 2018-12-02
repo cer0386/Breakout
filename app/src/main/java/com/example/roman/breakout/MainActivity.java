@@ -14,6 +14,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.example.roman.breakout.Items.Ball;
+import com.example.roman.breakout.Items.Brick;
 import com.example.roman.breakout.Items.Paddle;
 
 public class MainActivity extends Activity {
@@ -66,8 +68,11 @@ public class MainActivity extends Activity {
 
         int screenW, screenH;
 
-
         Paddle paddle;
+        Ball ball;
+        Brick[] bricks = new Brick[200];
+        int nOBricks = 0;
+
 
 
         public BreakoutView(Context context) {
@@ -79,6 +84,25 @@ public class MainActivity extends Activity {
             screenH = this.getResources().getDisplayMetrics().heightPixels;
 
             paddle = new Paddle(screenW, screenH);
+            ball = new Ball(screenW, screenH);
+
+
+            createBricksAndAll();
+        }
+
+        public void createBricksAndAll(){
+
+            ball.reset(screenW, screenH);
+
+            int brickW = screenW / 8;
+            int brickH = screenH / 10;
+            nOBricks = 0;
+            for(int column = 0; column < 8; column++){
+                for(int row = 0; row < 3; row++){
+                    bricks[nOBricks] = new Brick(row, column, brickW, brickH);
+                    nOBricks++;
+                }
+            }
         }
 
 
@@ -90,6 +114,14 @@ public class MainActivity extends Activity {
                 canvas.drawColor(Color.argb(255,  26, 128, 182));
                 paint.setColor(Color.argb(255,  255, 255, 255));
                 canvas.drawRect(paddle.getRect(),paint);
+                canvas.drawRect(ball.getRect(), paint);
+
+                paint.setColor(Color.argb(255,249,129,0));
+                for(int i = 0; i < nOBricks; i++){
+                    if(!bricks[i].isDestroyed()){
+                        canvas.drawRect(bricks[i].getRect(), paint);
+                    }
+                }
 
 
                 holder.unlockCanvasAndPost(canvas);
@@ -115,10 +147,11 @@ public class MainActivity extends Activity {
         public void update(){
 
             paddle.update(fps);
+            ball.update(fps);
         }
 
         public void pause(){
-            pause = true;
+            play = false;
             try{
                 gameThread.join();
             } catch(InterruptedException e){
@@ -127,7 +160,7 @@ public class MainActivity extends Activity {
         }
 
         public void resume(){
-            pause = false;
+            play = true;
             gameThread = new Thread(this);
             gameThread.start();
         }
