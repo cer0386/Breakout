@@ -31,7 +31,9 @@ public class BreakoutView extends SurfaceView implements Runnable {
 
     SurfaceHolder holder;
 
-    boolean pause = false;
+    volatile  boolean play;
+    boolean pause = true;
+
 
     Canvas canvas;
     Paint paint;
