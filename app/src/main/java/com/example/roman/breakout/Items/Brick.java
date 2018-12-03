@@ -14,10 +14,10 @@ public class Brick {
         int padding = 3;
 
         rect = new RectF(
-                column * w + padding,
-                row * h + padding,
-                column * w + w + padding,
-                row * h + h + padding
+                (column * w) + padding,
+                (row * h) + padding,
+                column * w + w - padding,
+                row * h + h - padding
                 );
     }
 

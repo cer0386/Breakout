@@ -17,14 +17,14 @@ public class Paddle {
     private int paddleDirection = STOP;
 
     public Paddle(int screenX, int screenY){
-        lenght = 130;
-        height = 20;
+        lenght = 200;
+        height = 40;
         x = screenX / 2;
-        y = screenY - 20;
+        y = screenY - 40;
 
         rect = new RectF(x, y, x + lenght, y+height);
 
-        paddleSpeed = 350;
+        paddleSpeed = 500;
     }
 
     public RectF getRect(){

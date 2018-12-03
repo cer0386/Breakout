@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -28,7 +29,7 @@ public class MainActivity extends Activity {
         breakoutView = new BreakoutView(this);
         setContentView(breakoutView);
 
-        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+        /*AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
         alertDialog.setTitle("To start the game press \"Start\"");
         //alertDialog.setMessage("");
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE,"Start",new DialogInterface.OnClickListener(){
@@ -37,7 +38,7 @@ public class MainActivity extends Activity {
             public void onClick(DialogInterface dialog, int which) {
                 finish();
             }
-        });
+        });*/
         //alertDialog.show();
     }
 
@@ -64,14 +65,14 @@ public class MainActivity extends Activity {
 
         private long timeThisFrame;
 
-        Bitmap bmp [];
-
         int screenW, screenH;
 
         Paddle paddle;
         Ball ball;
         Brick[] bricks = new Brick[200];
         int nOBricks = 0;
+        int score = 0;
+        //int life = 1;
 
 
 
@@ -92,7 +93,9 @@ public class MainActivity extends Activity {
 
         public void createBricksAndAll(){
 
+            pause = true;
             ball.reset(screenW, screenH);
+
 
             int brickW = screenW / 8;
             int brickH = screenH / 10;
@@ -103,6 +106,8 @@ public class MainActivity extends Activity {
                     nOBricks++;
                 }
             }
+            score = 0;
+            //life = 1;
         }
 
 
@@ -123,10 +128,45 @@ public class MainActivity extends Activity {
                     }
                 }
 
+                paint.setColor(Color.argb(255,255,255,255));
+                paint.setTextSize(40);
+                canvas.drawText("Score: " + score, 10,50,paint);
+
+                if(score == nOBricks * 10){
+                    paint.setTextSize(100);
+                    canvas.drawText("YOU HAVE WON!", 10, screenH/2, paint);
+                }
+
+                /*if(life <=0){
+                    paint.setTextSize(100);
+                    canvas.drawText("YOU HAVE LOST!", 10, screenH/2, paint);
+                }*/
+
 
                 holder.unlockCanvasAndPost(canvas);
             }
 
+        }
+
+        void setup(){
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    createAlertDialog();
+                }
+            });
+        }
+
+        void createAlertDialog(){
+            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+            alertDialog.setTitle("YOU LOST!");
+            alertDialog.setButton("Start Again", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    createBricksAndAll();
+                }
+            });
+            alertDialog.show();
         }
 
         @Override
@@ -135,6 +175,9 @@ public class MainActivity extends Activity {
             while(play){
                 long startFrameTime = System.currentTimeMillis();
 
+                if(!pause){
+                    update();
+                }
                 draw();
 
                 timeThisFrame = System.currentTimeMillis() - startFrameTime;
@@ -148,10 +191,60 @@ public class MainActivity extends Activity {
 
             paddle.update(fps);
             ball.update(fps);
+
+            //kolize s cihlama
+            for(int i = 0; i < nOBricks; i++){
+                if(!bricks[i].isDestroyed()){
+                    if(RectF.intersects(bricks[i].getRect(),ball.getRect())){
+                        bricks[i].setDestroyed();
+                        ball.reverseYDirection();
+                        score += 10;
+                    }
+                }
+            }
+
+            //kolize s plosinou
+            if(RectF.intersects(paddle.getRect(),ball.getRect())){
+                ball.reverseYDirection();
+                //ball.setRandomXDirection();
+                ball.clearY(paddle.getRect().top - 2);
+
+            }
+
+            //balon padl
+            if(ball.getRect().bottom > screenH){
+                //pause();
+                //life=0;
+                pause = true;
+                setup();
+            }
+
+            //strop
+            if(ball.getRect().top < 0){
+                ball.reverseYDirection();
+                ball.clearY(22); // 22, protoze funkce funguje se spodkem kule
+            }
+
+            //leva stena
+            if(ball.getRect().left < 0){
+                ball.reverseXDirection();
+                ball.clearX(2);
+
+            }
+
+            //prava stena
+            if(ball.getRect().right > screenW  ){
+                ball.reverseXDirection();
+                ball.clearX(screenW - 22);
+
+            }
+
+
         }
 
         public void pause(){
             play = false;
+            pause = true;
             try{
                 gameThread.join();
             } catch(InterruptedException e){
@@ -161,6 +254,7 @@ public class MainActivity extends Activity {
 
         public void resume(){
             play = true;
+            pause = false;
             gameThread = new Thread(this);
             gameThread.start();
         }

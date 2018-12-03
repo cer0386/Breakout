@@ -1,6 +1,7 @@
 package com.example.roman.breakout.Items;
 
 import android.graphics.RectF;
+import android.util.Log;
 
 import java.util.Random;
 
@@ -8,7 +9,8 @@ public class Ball {
 
     private RectF rect;
     private float xSpeed, ySpeed;
-    private float ballWidth, ballHeight = 10;
+    private float ballWidth = 20;
+    private float ballHeight = 20;
 
     public Ball(int screenX, int screenY){
 
@@ -24,14 +26,15 @@ public class Ball {
     }
 
     public void update(long fps){
-        rect.left = rect.left +(xSpeed / fps );
+        rect.left = rect.left +(xSpeed / fps);
         rect.top = rect.top + (ySpeed / fps);
-        rect.right = rect.right + ballWidth;
-        rect.bottom = rect.bottom + ballHeight;
+        rect.right = rect.left + ballWidth;
+        rect.bottom = rect.top + ballHeight ;
     }
 
     public void reverseXDirection(){
         xSpeed = - xSpeed;
+
     }
 
     public void reverseYDirection(){
@@ -39,11 +42,11 @@ public class Ball {
     }
 
     //random smer po hitnuti plosiny, predelat na casti te plosinky
-    public void setRandomXSpeed(){
+    public void setRandomXDirection(){
         Random random = new Random();
         int num = random.nextInt(2);
 
-        if(num ==0 ){
+        if(num == 0 ){
             reverseXDirection();
         }
     }
@@ -57,13 +60,14 @@ public class Ball {
     public void clearX(float x){
         rect.left = x;
         rect.right = x + ballWidth;
+
     }
 
     //umisti balon na vychozi pozici
     public void reset(int x, int y){
         rect.left = x / 2;
-        rect.top = y - 20;
-        rect.right = x / 2 +ballWidth;
-        rect.bottom = y - 20 - ballHeight;
+        rect.top = y - 40;
+        rect.right = x / 2 + ballWidth;
+        rect.bottom = y - 40 - ballHeight;
     }
 }
