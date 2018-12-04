@@ -4,13 +4,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -23,23 +24,16 @@ public class MainActivity extends Activity {
 
     BreakoutView breakoutView;
 
+    int screenW, screenH;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         breakoutView = new BreakoutView(this);
+
         setContentView(breakoutView);
 
-        /*AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-        alertDialog.setTitle("To start the game press \"Start\"");
-        //alertDialog.setMessage("");
-        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE,"Start",new DialogInterface.OnClickListener(){
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                finish();
-            }
-        });*/
-        //alertDialog.show();
     }
 
     /**
@@ -48,7 +42,7 @@ public class MainActivity extends Activity {
 
 
 //Runnable abych mohl pouzit vlakno na override run() metody
-    public class BreakoutView extends SurfaceView implements Runnable {
+    class BreakoutView extends SurfaceView implements Runnable {
 
         Thread gameThread = null;
 
@@ -65,14 +59,13 @@ public class MainActivity extends Activity {
 
         private long timeThisFrame;
 
-        int screenW, screenH;
 
         Paddle paddle;
         Ball ball;
         Brick[] bricks = new Brick[200];
         int nOBricks = 0;
         int score = 0;
-        //int life = 1;
+        boolean gameOver = false;
 
 
 
@@ -81,20 +74,28 @@ public class MainActivity extends Activity {
             holder = getHolder();
             paint = new Paint();
 
-            screenW = this.getResources().getDisplayMetrics().widthPixels;
-            screenH = this.getResources().getDisplayMetrics().heightPixels;
+
+            Display display = getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+
+            screenW = size.x;
+            screenH = size.y;
 
             paddle = new Paddle(screenW, screenH);
             ball = new Ball(screenW, screenH);
 
+            gameOver = false; // bude to tak, kdyz bude konec vyhodi mne to z aktivity a zapisu data
+            init();
 
-            createBricksAndAll();
         }
 
-        public void createBricksAndAll(){
+        public void init(){
+
 
             pause = true;
             ball.reset(screenW, screenH);
+            paddle.reset(screenW, screenH);
 
 
             int brickW = screenW / 8;
@@ -107,67 +108,12 @@ public class MainActivity extends Activity {
                 }
             }
             score = 0;
-            //life = 1;
+            //
+
+
         }
 
 
-        protected void draw() {
-
-            if(holder.getSurface().isValid()){
-                canvas = holder.lockCanvas();
-
-                canvas.drawColor(Color.argb(255,  26, 128, 182));
-                paint.setColor(Color.argb(255,  255, 255, 255));
-                canvas.drawRect(paddle.getRect(),paint);
-                canvas.drawRect(ball.getRect(), paint);
-
-                paint.setColor(Color.argb(255,249,129,0));
-                for(int i = 0; i < nOBricks; i++){
-                    if(!bricks[i].isDestroyed()){
-                        canvas.drawRect(bricks[i].getRect(), paint);
-                    }
-                }
-
-                paint.setColor(Color.argb(255,255,255,255));
-                paint.setTextSize(40);
-                canvas.drawText("Score: " + score, 10,50,paint);
-
-                if(score == nOBricks * 10){
-                    paint.setTextSize(100);
-                    canvas.drawText("YOU HAVE WON!", 10, screenH/2, paint);
-                }
-
-                /*if(life <=0){
-                    paint.setTextSize(100);
-                    canvas.drawText("YOU HAVE LOST!", 10, screenH/2, paint);
-                }*/
-
-
-                holder.unlockCanvasAndPost(canvas);
-            }
-
-        }
-
-        void setup(){
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    createAlertDialog();
-                }
-            });
-        }
-
-        void createAlertDialog(){
-            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-            alertDialog.setTitle("YOU LOST!");
-            alertDialog.setButton("Start Again", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    createBricksAndAll();
-                }
-            });
-            alertDialog.show();
-        }
 
         @Override
         public void run() {
@@ -200,23 +146,30 @@ public class MainActivity extends Activity {
                         ball.reverseYDirection();
                         score += 10;
                     }
+                    /*if(ball.getRect().right > bricks[i].getRect().left){
+                        ball.reverseXDirection();
+                    }
+                    if(ball.getRect().left < bricks[i].getRect().right){
+                        ball.reverseXDirection();
+                    }*/
                 }
             }
 
             //kolize s plosinou
             if(RectF.intersects(paddle.getRect(),ball.getRect())){
                 ball.reverseYDirection();
-                //ball.setRandomXDirection();
+                ball.setRandomXDirection();
                 ball.clearY(paddle.getRect().top - 2);
 
             }
 
             //balon padl
             if(ball.getRect().bottom > screenH){
-                //pause();
-                //life=0;
+
+                gameOver = true;
+
                 pause = true;
-                setup();
+                init();
             }
 
             //strop
@@ -242,9 +195,45 @@ public class MainActivity extends Activity {
 
         }
 
+        public void draw() {
+
+            if(holder.getSurface().isValid()){
+                canvas = holder.lockCanvas();
+
+                canvas.drawColor(Color.argb(255,  26, 128, 182));
+                paint.setColor(Color.argb(255,  255, 255, 255));
+                canvas.drawRect(paddle.getRect(),paint);
+                canvas.drawRect(ball.getRect(), paint);
+
+                paint.setColor(Color.argb(255,249,129,0));
+                for(int i = 0; i < nOBricks; i++){
+                    if(!bricks[i].isDestroyed()){
+                        canvas.drawRect(bricks[i].getRect(), paint);
+                    }
+                }
+
+                paint.setColor(Color.argb(255,255,255,255));
+                paint.setTextSize(40);
+                canvas.drawText("Score: " + score, 10,50,paint);
+
+                if(score == nOBricks * 10){
+                    paint.setTextSize(100);
+                    canvas.drawText("YOU HAVE WON!", 10, screenH/2, paint);
+                }
+                if(gameOver){
+                    paint.setTextSize(100);
+                    canvas.drawText("YOU HAVE LOST!", 10, screenH/2, paint);
+                }
+
+
+                holder.unlockCanvasAndPost(canvas);
+            }
+
+        }
+
         public void pause(){
             play = false;
-            pause = true;
+            //pause = true;
             try{
                 gameThread.join();
             } catch(InterruptedException e){
@@ -254,7 +243,7 @@ public class MainActivity extends Activity {
 
         public void resume(){
             play = true;
-            pause = false;
+            //pause = false;
             gameThread = new Thread(this);
             gameThread.start();
         }

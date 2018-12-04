@@ -7,7 +7,7 @@ public class Paddle {
     //objekt co ma v sobe 4 souradnice
     private RectF rect;
 
-    private float lenght, height, x, y, paddleSpeed;
+    private float width, height, x, y, paddleSpeed;
 
     //smer plosiny
     public final int STOP = 0;
@@ -17,12 +17,12 @@ public class Paddle {
     private int paddleDirection = STOP;
 
     public Paddle(int screenX, int screenY){
-        lenght = 200;
+        width = 200;
         height = 40;
         x = screenX / 2;
         y = screenY - 40;
 
-        rect = new RectF(x, y, x + lenght, y+height);
+        rect = new RectF(x, y, x + width, y+height);
 
         paddleSpeed = 500;
     }
@@ -44,7 +44,16 @@ public class Paddle {
             x = x + paddleSpeed / fps;
         }
         rect.left = x;
-        rect.right = x + lenght;
+        rect.right = x + width;
+    }
+
+    public void reset(int x, int y){
+        rect.left = x / 2;
+        rect.top = y - 40;
+        rect.right = x / 2 + width;
+        rect.bottom = y + height;
+
+
     }
 
 

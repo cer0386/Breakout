@@ -18,7 +18,10 @@ public class Ball {
         ySpeed = -400;
 
         //Umisti balon do stredu obrazovky
-        rect = new RectF();
+        rect = new RectF(screenX / 2,
+        screenY - 60,
+        screenX / 2 + ballWidth,
+        screenY - 60 - ballHeight );
     }
 
     public RectF getRect() {
@@ -34,7 +37,6 @@ public class Ball {
 
     public void reverseXDirection(){
         xSpeed = - xSpeed;
-
     }
 
     public void reverseYDirection(){
@@ -66,8 +68,11 @@ public class Ball {
     //umisti balon na vychozi pozici
     public void reset(int x, int y){
         rect.left = x / 2;
-        rect.top = y - 40;
+        rect.top = y - 60;
         rect.right = x / 2 + ballWidth;
-        rect.bottom = y - 40 - ballHeight;
+        rect.bottom = y - 60 - ballHeight;
+        xSpeed = -200;
+        ySpeed = -400;
+
     }
 }
