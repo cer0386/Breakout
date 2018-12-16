@@ -189,9 +189,7 @@ public class MainActivity extends Activity {
 
                 sound.playGameOver();
 
-                Intent intent = new Intent(MainActivity.this, GiveName.class);
-                intent.putExtra("score",score);
-                startActivity(intent);
+
 
             }
 
@@ -244,11 +242,19 @@ public class MainActivity extends Activity {
                     canvas.drawText("YOU HAVE WON!", 10, screenH/2, paint);
                     sound.playVictory();
                     pause = true;
+
+                    Intent intent = new Intent(MainActivity.this, GiveName.class);
+                    intent.putExtra("score",score);
+                    startActivity(intent);
                 }
                 if(gameOver){
                     paint.setTextSize(100);
                     canvas.drawText("YOU HAVE LOST!", 10, screenH/2, paint);
                     pause = true;
+
+                    Intent intent = new Intent(MainActivity.this, GiveName.class);
+                    intent.putExtra("score",score);
+                    startActivity(intent);
                 }
 
 
