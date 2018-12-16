@@ -4,11 +4,15 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.RectF;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -19,6 +23,9 @@ import android.view.SurfaceView;
 import com.example.roman.breakout.Items.Ball;
 import com.example.roman.breakout.Items.Brick;
 import com.example.roman.breakout.Items.Paddle;
+import com.example.roman.breakout.Items.Sound;
+
+import java.io.IOException;
 
 public class MainActivity extends Activity {
 
@@ -49,7 +56,7 @@ public class MainActivity extends Activity {
         SurfaceHolder holder;
 
         volatile  boolean play;
-        boolean pause = true;
+        boolean pause;
 
 
         Canvas canvas;
@@ -65,7 +72,11 @@ public class MainActivity extends Activity {
         Brick[] bricks = new Brick[200];
         int nOBricks = 0;
         int score = 0;
-        boolean gameOver = false;
+        boolean gameOver;
+        Sound sound;
+
+
+
 
 
 
@@ -73,7 +84,7 @@ public class MainActivity extends Activity {
             super(context);
             holder = getHolder();
             paint = new Paint();
-
+            pause = true;
 
             Display display = getWindowManager().getDefaultDisplay();
             Point size = new Point();
@@ -86,6 +97,10 @@ public class MainActivity extends Activity {
             ball = new Ball(screenW, screenH);
 
             gameOver = false; // bude to tak, kdyz bude konec vyhodi mne to z aktivity a zapisu data
+            sound = new Sound(context);
+
+
+
             init();
 
         }
@@ -145,6 +160,7 @@ public class MainActivity extends Activity {
                         bricks[i].setDestroyed();
                         ball.reverseYDirection();
                         score += 10;
+                        sound.playDestroy();
                     }
                     /*if(ball.getRect().right > bricks[i].getRect().left){
                         ball.reverseXDirection();
@@ -157,9 +173,11 @@ public class MainActivity extends Activity {
 
             //kolize s plosinou
             if(RectF.intersects(paddle.getRect(),ball.getRect())){
+                sound.playContact();
                 ball.reverseYDirection();
                 ball.setRandomXDirection();
                 ball.clearY(paddle.getRect().top - 2);
+
 
             }
 
@@ -169,6 +187,9 @@ public class MainActivity extends Activity {
                 gameOver = true;
 
                 pause = true;
+
+
+                sound.playGameOver();
                 init();
             }
 
@@ -219,10 +240,13 @@ public class MainActivity extends Activity {
                 if(score == nOBricks * 10){
                     paint.setTextSize(100);
                     canvas.drawText("YOU HAVE WON!", 10, screenH/2, paint);
+                    sound.playVictory();
+                    pause = true;
                 }
                 if(gameOver){
                     paint.setTextSize(100);
                     canvas.drawText("YOU HAVE LOST!", 10, screenH/2, paint);
+                    pause = true;
                 }
 
 
