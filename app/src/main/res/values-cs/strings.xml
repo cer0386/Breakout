@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Breakout</string>
+    <string name="play">Hrát</string>
+    <string name="score">Skóre</string>
+    <string name="leaderboard">Žebříček</string>
+    <string name="name">Jméno</string>
+    <string name="giveName">Zadej dolů své jméno</string>
+    <string name="ascend">POVSTAŇ MEZI HRDINY</string>
+    <string name="back">Zpět</string>
+</resources>

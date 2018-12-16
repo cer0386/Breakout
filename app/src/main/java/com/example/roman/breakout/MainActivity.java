@@ -1,18 +1,13 @@
 package com.example.roman.breakout;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.AssetManager;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.RectF;
-import android.media.AudioManager;
-import android.media.SoundPool;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -22,10 +17,9 @@ import android.view.SurfaceView;
 
 import com.example.roman.breakout.Items.Ball;
 import com.example.roman.breakout.Items.Brick;
+import com.example.roman.breakout.utilities.LvL;
 import com.example.roman.breakout.Items.Paddle;
-import com.example.roman.breakout.Items.Sound;
-
-import java.io.IOException;
+import com.example.roman.breakout.utilities.Sound;
 
 public class MainActivity extends Activity {
 
@@ -74,6 +68,7 @@ public class MainActivity extends Activity {
         int score = 0;
         boolean gameOver;
         Sound sound;
+        LvL level;
 
 
 
@@ -100,7 +95,7 @@ public class MainActivity extends Activity {
             sound = new Sound(context);
 
 
-
+            //level = new LvL();
             init();
 
         }
@@ -116,8 +111,11 @@ public class MainActivity extends Activity {
             int brickW = screenW / 8;
             int brickH = screenH / 10;
             nOBricks = 0;
+
+
+            //cihly
             for(int column = 0; column < 8; column++){
-                for(int row = 0; row < 3; row++){
+                for(int row = 0; row < 2; row++){
                     bricks[nOBricks] = new Brick(row, column, brickW, brickH);
                     nOBricks++;
                 }
@@ -190,7 +188,11 @@ public class MainActivity extends Activity {
 
 
                 sound.playGameOver();
-                init();
+
+                Intent intent = new Intent(MainActivity.this, GiveName.class);
+                intent.putExtra("score",score);
+                startActivity(intent);
+
             }
 
             //strop

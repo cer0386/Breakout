@@ -1,4 +1,4 @@
-package com.example.roman.breakout.Items;
+package com.example.roman.breakout.utilities;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;

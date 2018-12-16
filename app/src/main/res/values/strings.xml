@@ -2,4 +2,10 @@
     <string name="app_name">Breakout</string>
     <string name="play">Play</string>
     <string name="score">Score</string>
+    <string name="leaderboard">Leaderboard</string>
+    <string name="name">Name</string>
+    <string name="giveName">Type down your name</string>
+    <string name="ascend">ASCEND AMONG HEROES</string>
+    <string name="back">Back</string>
+
 </resources>
