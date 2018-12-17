@@ -19,6 +19,7 @@ import com.example.roman.breakout.Items.Ball;
 import com.example.roman.breakout.Items.Brick;
 import com.example.roman.breakout.utilities.LvL;
 import com.example.roman.breakout.Items.Paddle;
+import com.example.roman.breakout.utilities.OrientationData;
 import com.example.roman.breakout.utilities.Sound;
 
 public class MainActivity extends Activity {
@@ -70,6 +71,9 @@ public class MainActivity extends Activity {
         Sound sound;
         LvL level;
 
+        private OrientationData orientationData ;
+        private long framTime;
+
 
 
 
@@ -111,6 +115,8 @@ public class MainActivity extends Activity {
             int brickW = screenW / 8;
             int brickH = screenH / 10;
             nOBricks = 0;
+            orientationData = new OrientationData(getApplication());
+            orientationData.register();
 
 
             //cihly
@@ -140,6 +146,30 @@ public class MainActivity extends Activity {
                 draw();
 
                 timeThisFrame = System.currentTimeMillis() - startFrameTime;
+                int elapsedTime = (int) timeThisFrame;
+
+                if(orientationData.getOrientation() != null && orientationData.getStartOrientation()!=null){
+                    //1. souradnice v tom poli je pro Y souradnici
+                    // souradnice X jde od PI/2 do -PI/2, tak to vynásobit 2
+                    float roll = (orientationData.getOrientation()[1] - orientationData.getStartOrientation()[1])*10;
+
+                    Log.d("rollingg", "roll: "+roll);
+                    //čím víc má tiltnutou obrazovku, tím rychleji půjde
+                    if(roll < -2)
+                        paddle.setMovementDirection(paddle.RIGHT);
+                    else if(roll > 2){
+                        paddle.setMovementDirection(paddle.LEFT);
+                    }
+                    if(roll <=2 && roll >= -2){
+                        paddle.setMovementDirection(paddle.STOP);
+                    }
+
+                }
+
+
+
+
+
                 if(timeThisFrame >= 1){
                     fps = 1000/ timeThisFrame;
                 }
@@ -147,6 +177,7 @@ public class MainActivity extends Activity {
         }
 
         public void update(){
+
 
             paddle.update(fps);
             ball.update(fps);
@@ -169,6 +200,9 @@ public class MainActivity extends Activity {
                 }
             }
 
+
+
+
             //kolize s plosinou
             if(RectF.intersects(paddle.getRect(),ball.getRect())){
                 sound.playContact();
@@ -186,7 +220,8 @@ public class MainActivity extends Activity {
 
                 pause = true;
 
-
+                orientationData.newGame();
+                orientationData.pause();
                 sound.playGameOver();
 
 
@@ -289,12 +324,16 @@ public class MainActivity extends Activity {
 
                     pause = false;
 
-                    if(motionEvent.getX() > screenW / 2){
-                        paddle.setMovementDirection(paddle.RIGHT);
-                    }
-                    else{
-                        paddle.setMovementDirection(paddle.LEFT);
-                    }
+
+
+                            if(motionEvent.getX() > screenW / 2){
+                                paddle.setMovementDirection(paddle.RIGHT);
+                            }
+                            else{
+                                paddle.setMovementDirection(paddle.LEFT);
+                            }
+
+
                     break;
                 //pryc s prstem
                 case MotionEvent.ACTION_UP:

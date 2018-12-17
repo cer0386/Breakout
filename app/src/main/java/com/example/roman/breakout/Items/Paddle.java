@@ -7,7 +7,8 @@ public class Paddle {
     //objekt co ma v sobe 4 souradnice
     private RectF rect;
 
-    private float width, height, x, y, paddleSpeed;
+    private float width, height, paddleSpeed;
+    private float x, y;
 
     //smer plosiny
     public final int STOP = 0;
@@ -46,6 +47,7 @@ public class Paddle {
         rect.left = x;
         rect.right = x + width;
     }
+
 
     public void reset(int x, int y){
         rect.left = x / 2;
